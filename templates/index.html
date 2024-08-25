@@ -5,55 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+    <link href='../static/style.css' rel='stylesheet'>
     <title>GEMINI AI</title>
-    <style>
-        body {
-            font-family: 'Poppins';
-            background-color: rgb(24, 21, 21);
-        }
-
-        h1 {
-            color: rgb(255, 255, 255);
-            text-align: center;
-            font-size: 24px;
-        }
-
-        #button-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 10vh;
-        }
-
-        #button {
-            background-color: rgba(36, 34, 34, 0.411);
-            color: white;
-            border: 2px solid rgb(255, 255, 255);
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: border-color 0.3s ease;
-            border-radius: 100px;
-        }
-
-        #button.active {
-            border-color: red;
-        }
-
-        #recognized-text,
-        #ai-response {
-            text-align: center;
-            color: white;
-        }
-
-
-        span {
-            font-size: 15px;
-            font-weight: bolder;
-            color: rgb(255, 255, 255);
-        }
-        
-    </style>
 </head>
 
 <body>
@@ -96,16 +49,12 @@
                     resetButton();
                     return;
                 }
-
                 recognition = new SpeechRecognition();
                 recognition.lang = 'pt-BR';
                 recognition.start();
-
                 recognition.onresult = (event) => {
                     const text = event.results[0][0].transcript;
                     recognizedText.innerText = `User: ${text}`;
-
-                    // Envie o texto para o backend Flask para processamento adicional
                     fetch('/iniciar_chat', {
                         method: 'POST',
                         headers: {
@@ -116,14 +65,9 @@
                         .then(response => response.json())
                         .then(data => {
                             console.log(data.message);
-                            // Utilize a síntese de voz do navegador para falar a resposta
                             utterance = new SpeechSynthesisUtterance(data.message);
                             speechSynthesis.speak(utterance);
-
-                            // Exibir a resposta da AI no parágrafo
                             aiResponse.innerText = `IA: ${data.message}\n`;
-                            
-                            // Adicionar um evento que será disparado quando a fala terminar
                             utterance.onend = resetButton;
                         })
                         .catch(error => {
@@ -131,38 +75,29 @@
                             resetButton();
                         });
                 };
-
                 recognition.onerror = (event) => {
                     console.error('Erro no reconhecimento de fala:', event.error);
                     recognizedText.innerText = `Erro no reconhecimento de fala: ${event.error}`;
                     resetButton();
                 };
             }
-
             function stopRecognition() {
                 if (recognition) {
                     recognition.stop();
                     recognition = null;
                 }
-
                 if (utterance) {
                     speechSynthesis.cancel();
                     utterance = null;
                 }
-
                 resetButton();
             }
-
             function resetButton() {
                 isRecognizing = false;
                 buttonContainer.classList.remove('active');
                 button.classList.remove('active');
             }
         });
-
-
-
-
     </script>
 </body>
 
