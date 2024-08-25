@@ -3,7 +3,7 @@
 <h2>SÓ FUNCIONA NO NAVEGADOR GOOGLE CHROME</h2>
 Este projeto foi criado com intuido educativo.
 
-Peço que coloquem meu nick como credíto ao utilizar o código!
+Peço que coloquem meu nick como credíto ao utilizar e compartilhar o código!
 <br><br>
 Visitem meu perfil e apoiem S2
 <br>
