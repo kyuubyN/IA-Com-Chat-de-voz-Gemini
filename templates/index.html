@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+    <title>GEMINI AI</title>
+    <style>
+        body {
+            font-family: 'Poppins';
+            background-color: rgb(24, 21, 21);
+        }
+
+        h1 {
+            color: rgb(255, 255, 255);
+            text-align: center;
+            font-size: 24px;
+        }
+
+        #button-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 10vh;
+        }
+
+        #button {
+            background-color: rgba(36, 34, 34, 0.411);
+            color: white;
+            border: 2px solid rgb(255, 255, 255);
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+            border-radius: 100px;
+        }
+
+        #button.active {
+            border-color: red;
+        }
+
+        #recognized-text,
+        #ai-response {
+            text-align: center;
+            color: white;
+        }
+
+
+        span {
+            font-size: 15px;
+            font-weight: bolder;
+            color: rgb(255, 255, 255);
+        }
+        
+    </style>
+</head>
+
+<body>
+    <h1>Olá, eu sou sua IA de voz!</h1>
+    <div id="button-container">
+        <button id="button"><span>Conversar</span></button>
+    </div>
+    <div class="bot">
+    <p id="recognized-text"></p>
+    <p id="ai-response"></p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const buttonContainer = document.getElementById('button-container');
+            const button = document.getElementById('button');
+            const recognizedText = document.getElementById('recognized-text');
+            const aiResponse = document.getElementById('ai-response');
+            let isRecognizing = false;
+            let recognition;
+            let utterance;
+
+            button.addEventListener('click', function () {
+                if (!isRecognizing) {
+                    startRecognition();
+                } else {
+                    stopRecognition();
+                }
+            });
+
+            function startRecognition() {
+                isRecognizing = true;
+                buttonContainer.classList.add('active');
+                button.classList.add('active');
+
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) {
+                    console.error('Speech Recognition API não suportada no seu navegador.');
+                    recognizedText.innerText = 'Speech Recognition API não suportada no seu navegador.';
+                    resetButton();
+                    return;
+                }
+
+                recognition = new SpeechRecognition();
+                recognition.lang = 'pt-BR';
+                recognition.start();
+
+                recognition.onresult = (event) => {
+                    const text = event.results[0][0].transcript;
+                    recognizedText.innerText = `User: ${text}`;
+
+                    // Envie o texto para o backend Flask para processamento adicional
+                    fetch('/iniciar_chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ text })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log(data.message);
+                            // Utilize a síntese de voz do navegador para falar a resposta
+                            utterance = new SpeechSynthesisUtterance(data.message);
+                            speechSynthesis.speak(utterance);
+
+                            // Exibir a resposta da AI no parágrafo
+                            aiResponse.innerText = `IA: ${data.message}\n`;
+                            
+                            // Adicionar um evento que será disparado quando a fala terminar
+                            utterance.onend = resetButton;
+                        })
+                        .catch(error => {
+                            console.error('Erro:', error);
+                            resetButton();
+                        });
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Erro no reconhecimento de fala:', event.error);
+                    recognizedText.innerText = `Erro no reconhecimento de fala: ${event.error}`;
+                    resetButton();
+                };
+            }
+
+            function stopRecognition() {
+                if (recognition) {
+                    recognition.stop();
+                    recognition = null;
+                }
+
+                if (utterance) {
+                    speechSynthesis.cancel();
+                    utterance = null;
+                }
+
+                resetButton();
+            }
+
+            function resetButton() {
+                isRecognizing = false;
+                buttonContainer.classList.remove('active');
+                button.classList.remove('active');
+            }
+        });
+
+
+
+
+    </script>
+</body>
+
+</html>
