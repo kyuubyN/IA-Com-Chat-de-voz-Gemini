@@ -3,8 +3,4 @@
 <h2>SÓ FUNCIONA NO NAVEGADOR GOOGLE CHROME</h2>
 Este projeto foi criado com intuido educativo.
 
-Peço que coloquem meu nick e link do perfil como credíto ao utilizar e compartilhar o código!
-<br><br>
-Visitem meu perfil e apoiem!
-<br>
-<img src="https://i0.wp.com/sdsandwiches.com/konata-v-small.png" height="200px">
+
